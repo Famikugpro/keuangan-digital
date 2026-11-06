@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catat Keuangan | DaffCv</title>
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#111827">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #111827; }
+        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+
+        @keyframes logoEnter {
+            0% { opacity: 0; transform: translateY(15px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .animate-logo {
+            animation: logoEnter 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 font-sans antialiased min-h-screen">
+
+    <!-- Splash Screen DaffCv -->
+    <div id="splash-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-900 transition-opacity duration-500">
+        <h1 class="text-5xl md:text-7xl font-bold tracking-wider opacity-0 animate-logo text-white">
+            Daff<span class="text-blue-500">Cv</span>
+        </h1>
+        <p class="mt-4 text-gray-500 text-sm tracking-[0.3em] uppercase opacity-0 animate-logo" style="animation-delay: 0.3s;">
+            Financial Tracker
+        </p>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="max-w-5xl mx-auto p-4 md:p-6 opacity-0 transition-opacity duration-700 pt-10">
+        
+        <!-- Header -->
+        <header class="mb-8 flex justify-between items-center border-b border-gray-800 pb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-white">Dashboard Keuangan</h1>
+                <p class="text-gray-400 text-sm">Kelola arus kas Anda dengan mudah</p>
+            </div>
+            <div class="text-right">
+                <span class="text-xs text-gray-500 uppercase tracking-widest font-semibold">Dev by</span>
+                <p class="text-sm font-bold text-white">DaffCv</p>
+            </div>
+        </header>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="bg-gray-800 p-5 rounded-lg border border-gray-700">
+                <p class="text-gray-400 text-sm mb-1">Total Saldo</p>
+                <h2 class="text-3xl font-bold text-white" id="total-saldo">Rp 0</h2>
+            </div>
+            <div class="bg-gray-800 p-5 rounded-lg border border-gray-700">
+                <p class="text-gray-400 text-sm mb-1">Total Pemasukan</p>
+                <h2 class="text-2xl font-bold text-green-400" id="total-pemasukan">Rp 0</h2>
+            </div>
+            <div class="bg-gray-800 p-5 rounded-lg border border-gray-700">
+                <p class="text-gray-400 text-sm mb-1">Total Pengeluaran</p>
+                <h2 class="text-2xl font-bold text-red-400" id="total-pengeluaran">Rp 0</h2>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Form Input -->
+            <div class="lg:col-span-1">
+                <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                    <h3 class="text-lg font-semibold text-white mb-4">Catat Transaksi</h3>
+                    <form id="form-transaksi" class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">Keterangan</label>
+                            <input type="text" id="keterangan" required placeholder="Contoh: Gaji bulanan, Beli kopi..." 
+                                class="w-full bg-gray-900 border border-gray-700 text-white rounded px-4 py-2.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">Nominal (Rp)</label>
+                            <input type="text" id="nominal" required placeholder="100.000" 
+                                class="w-full bg-gray-900 border border-gray-700 text-white rounded px-4 py-2.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">Tipe Transaksi</label>
+                            <select id="tipe" class="w-full bg-gray-900 border border-gray-700 text-white rounded px-4 py-2.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+                                <option value="pemasukan">Pemasukan</option>
+                                <option value="pengeluaran">Pengeluaran</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium rounded py-2.5 transition-colors mt-2">
+                            Simpan Transaksi
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Riwayat Transaksi -->
+            <div class="lg:col-span-2">
+                <div class="bg-gray-800 p-6 rounded-lg border border-gray-700 min-h-[400px]">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-white">Riwayat Transaksi</h3>
+                        <button id="btn-reset" class="text-sm text-red-400 hover:text-red-300 transition-colors">
+                            <i class="fas fa-trash-alt mr-1"></i> Hapus Semua
+                        </button>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-gray-700 text-gray-400 text-sm">
+                                    <th class="pb-3 font-medium">Tanggal</th>
+                                    <th class="pb-3 font-medium">Keterangan</th>
+                                    <th class="pb-3 font-medium">Tipe</th>
+                                    <th class="pb-3 font-medium text-right">Nominal</th>
+                                    <th class="pb-3 font-medium text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="list-transaksi" class="text-sm"></tbody>
+                        </table>
+                        <div id="empty-state" class="text-center py-10 hidden">
+                            <p class="text-gray-500">Belum ada data transaksi.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Registrasi Service Worker untuk Offline Support
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service Worker terdaftar!', reg))
+                    .catch(err => console.log('Gagal mendaftarkan Service Worker', err));
+            });
+        }
+
+        // --- SPLASH SCREEN ---
+        window.addEventListener('DOMContentLoaded', () => {
+            const splashScreen = document.getElementById('splash-screen');
+            const mainContent = document.getElementById('main-content');
+            setTimeout(() => {
+                splashScreen.classList.add('opacity-0');
+                setTimeout(() => {
+                    splashScreen.style.display = 'none';
+                    mainContent.classList.remove('opacity-0');
+                }, 500);
+            }, 2000);
+        });
+
+        // --- LOGIKA KEUANGAN ---
+        let transaksi = JSON.parse(localStorage.getItem('dataKeuanganDaffCv')) || [];
+
+        const formTransaksi = document.getElementById('form-transaksi');
+        const inputKeterangan = document.getElementById('keterangan');
+        const inputNominal = document.getElementById('nominal');
+        const inputTipe = document.getElementById('tipe');
+        const listTransaksi = document.getElementById('list-transaksi');
+        const emptyState = document.getElementById('empty-state');
+        const elTotalSaldo = document.getElementById('total-saldo');
+        const elTotalPemasukan = document.getElementById('total-pemasukan');
+        const elTotalPengeluaran = document.getElementById('total-pengeluaran');
+        const btnReset = document.getElementById('btn-reset');
+
+        inputNominal.addEventListener('input', function(e) {
+            let value = this.value.replace(/[^0-9]/g, '');
+            if (value) {
+                this.value = formatRupiahText(value);
+            }
+        });
+
+        function formatRupiahText(angka) {
+            return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        const formatRupiah = (angka) => {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(angka);
+        };
+
+        const formatTanggal = (dateString) => {
+            const options = { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+            return new Date(dateString).toLocaleDateString('id-ID', options);
+        };
+
+        function updateUI() {
+            listTransaksi.innerHTML = '';
+            let totalPemasukan = 0;
+            let totalPengeluaran = 0;
+
+            if (transaksi.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                transaksi.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal)).forEach((item) => {
+                    if (item.tipe === 'pemasukan') totalPemasukan += item.nominal;
+                    if (item.tipe === 'pengeluaran') totalPengeluaran += item.nominal;
+
+                    const tr = document.createElement('tr');
+                    tr.className = 'border-b border-gray-800 hover:bg-gray-800/50 transition-colors';
+                    const warnaNominal = item.tipe === 'pemasukan' ? 'text-green-400' : 'text-red-400';
+                    const tanda = item.tipe === 'pemasukan' ? '+' : '-';
+                    const badgeClass = item.tipe === 'pemasukan' ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20';
+
+                    tr.innerHTML = `
+                        <td class="py-3 text-gray-400">${formatTanggal(item.tanggal)}</td>
+                        <td class="py-3 text-white font-medium">${item.keterangan}</td>
+                        <td class="py-3"><span class="px-2 py-1 text-xs rounded border capitalize ${badgeClass}">${item.tipe}</span></td>
+                        <td class="py-3 text-right font-semibold ${warnaNominal}">${tanda} ${formatRupiah(item.nominal).replace('Rp', '')}</td>
+                        <td class="py-3 text-center">
+                            <button onclick="hapusTransaksi(${item.id})" class="text-gray-500 hover:text-red-400 transition-colors p-1">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </td>
+                    `;
+                    listTransaksi.appendChild(tr);
+                });
+            }
+
+            const totalSaldo = totalPemasukan - totalPengeluaran;
+            elTotalPemasukan.innerText = formatRupiah(totalPemasukan);
+            elTotalPengeluaran.innerText = formatRupiah(totalPengeluaran);
+            elTotalSaldo.innerText = formatRupiah(totalSaldo);
+            
+            if(totalSaldo < 0) {
+                elTotalSaldo.classList.remove('text-white');
+                elTotalSaldo.classList.add('text-red-400');
+            } else {
+                elTotalSaldo.classList.remove('text-red-400');
+                elTotalSaldo.classList.add('text-white');
+            }
+
+            localStorage.setItem('dataKeuanganDaffCv', JSON.stringify(transaksi));
+        }
+
+        formTransaksi.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const keterangan = inputKeterangan.value.trim();
+            const nominalRaw = inputNominal.value.replace(/\./g, '');
+            const nominal = parseInt(nominalRaw);
+            const tipe = inputTipe.value;
+
+            if (!keterangan || isNaN(nominal) || nominal <= 0) {
+                alert('Mohon isi keterangan dan nominal dengan benar!');
+                return;
+            }
+
+            transaksi.push({
+                id: Date.now(),
+                keterangan,
+                nominal,
+                tipe,
+                tanggal: new Date().toISOString()
+            });
+            updateUI();
+            formTransaksi.reset();
+            inputKeterangan.focus();
+        });
+
+        window.hapusTransaksi = (id) => {
+            if(confirm('Yakin ingin menghapus transaksi ini?')) {
+                transaksi = transaksi.filter(t => t.id !== id);
+                updateUI();
+            }
+        };
+
+        btnReset.addEventListener('click', () => {
+            if(transaksi.length > 0 && confirm('PERINGATAN: Anda yakin ingin menghapus SEMUA data riwayat keuangan?')) {
+                transaksi = [];
+                updateUI();
+            }
+        });
+
+        updateUI();
+    </script>
+</body>
+</html>
