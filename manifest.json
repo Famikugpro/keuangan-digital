@@ -1,6 +1,6 @@
 {
-  "name": "Catat Keuangan DaffCv",
-  "short_name": "Keuangan",
+  "name": "Catat Keuangan DaffCv Pro",
+  "short_name": "KeuanganPro",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#111827",
