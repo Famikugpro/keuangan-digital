@@ -1,25 +1,20 @@
-const CACHE_NAME = 'daffcv-keuangan-v1';
+const CACHE_NAME = 'daffcv-keuangan-v2';
 const assets = [
   './index.html',
   './manifest.json',
   'https://cdn.tailwindcss.com',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css',
+  'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'
 ];
 
-// Install Service Worker
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(assets);
-    })
+    caches.open(CACHE_NAME).then(cache => cache.addAll(assets))
   );
 });
 
-// Fetch dari Cache saat Offline
 self.addEventListener('fetch', e => {
   e.respondWith(
-    caches.match(e.request).then(response => {
-      return response || fetch(e.request);
-    })
+    caches.match(e.request).then(response => response || fetch(e.request))
   );
 });
