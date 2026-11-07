@@ -16,17 +16,14 @@
       
       <input type="text" id="uidInput" placeholder="Contoh: daffa-001" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-white text-center tracking-wider font-mono focus:outline-none focus:border-blue-500 mb-4 relative z-50">
       
-      <!-- TOMBOL VERIFIKASI (MENGGUNAKAN ID UNTUK EVENT LISTENER) -->
-      <button type="button" id="verifyBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition mb-3 cursor-pointer relative z-50">
+      <button type="button" onclick="verifyUID()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition mb-3 cursor-pointer relative z-50">
         Verifikasi UID
       </button>
 
-      <!-- TOMBOL BELI AKSES KE NETLIFY -->
       <a href="https://pro-keuangan-digital.netlify.app" target="_blank" class="block w-full bg-gray-700 hover:bg-gray-600 text-gray-200 text-sm font-medium py-2.5 rounded-lg transition mb-2 text-center relative z-50">
         Beli Akses (Jika Trial / Masa Aktif Habis)
       </a>
 
-      <!-- TOMBOL BELI AKSES KE WHATSAPP ADMIN -->
       <a href="https://wa.me/6281234567890?text=Halo%20Admin%20DaffCv,%20saya%20ingin%20membeli%20atau%20memperpanjang%20akses%20aplikasi%20keuangan." target="_blank" class="block w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium py-2.5 rounded-lg transition text-center relative z-50">
         Beli Akses Disini (WhatsApp Admin)
       </a>
@@ -42,7 +39,7 @@
         <h1 class="text-xl font-bold">Catat Keuangan Pro</h1>
         <p class="text-xs text-gray-400" id="welcomeUser">Halo, Daffa</p>
       </div>
-      <button id="logoutBtn" class="text-xs bg-red-600/20 text-red-400 hover:bg-red-600/30 px-3 py-1.5 rounded-lg transition">
+      <button onclick="logout()" class="text-xs bg-red-600/20 text-red-400 hover:bg-red-600/30 px-3 py-1.5 rounded-lg transition">
         Keluar
       </button>
     </header>
@@ -52,7 +49,6 @@
       <div class="flex flex-col md:flex-row justify-between items-center gap-4">
         <h3 class="text-base font-semibold">Kontrol Keuangan</h3>
         
-        <!-- Pilihan Mode Bulanan / Mingguan -->
         <div class="flex items-center gap-2">
           <label for="reportPeriod" class="text-sm text-gray-300">Tampilkan:</label>
           <select id="reportPeriod" class="bg-gray-700 border border-gray-600 rounded px-3 py-1.5 text-sm text-white focus:outline-none">
@@ -61,8 +57,7 @@
           </select>
         </div>
 
-        <!-- Tombol Cetak Struk / Laporan -->
-        <button id="printBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
+        <button onclick="printFinancialReport()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
           </svg>
@@ -100,7 +95,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // --- KONFIGURASI FIREBASE ANDA ---
     const firebaseConfig = {
       apiKey: "AIzaSyDq6ryYiRXF2oDz8wfVoXrROaw8YhBlzA",
       authDomain: "daffcv-keuangan.firebaseapp.com",
@@ -114,8 +108,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Cek Sesi Login Tersimpan saat halaman dimuat
-    window.addEventListener('DOMContentLoaded', () => {
+    window.onload = function() {
       const savedUser = localStorage.getItem('daffcv_active_user');
       if (savedUser) {
         document.getElementById('authModal').classList.add('hidden');
@@ -123,16 +116,9 @@
         document.getElementById('welcomeUser').innerText = `Halo, ${savedUser}`;
         loadTransactions();
       }
+    };
 
-      // Hubungkan tombol-tombol dengan event listener secara aman
-      document.getElementById('verifyBtn').addEventListener('click', verifyUID);
-      document.getElementById('logoutBtn').addEventListener('click', logout);
-      document.getElementById('printBtn').addEventListener('click', printFinancialReport);
-      document.getElementById('reportPeriod').addEventListener('change', loadTransactions);
-    });
-
-    // Fungsi Verifikasi UID ke Firestore
-    async function verifyUID() {
+    window.verifyUID = async function() {
       const uid = document.getElementById('uidInput').value.trim();
       const errorEl = document.getElementById('authError');
       
@@ -171,12 +157,12 @@
         errorEl.innerText = "Gagal terhubung ke server verifikasi. Periksa koneksi/aturan.";
         errorEl.classList.remove('hidden');
       }
-    }
+    };
 
-    function logout() {
+    window.logout = function() {
       localStorage.removeItem('daffcv_active_user');
       location.reload();
-    }
+    };
 
     function getStoredTransactions() {
       let txs = JSON.parse(localStorage.getItem('daffcv_transactions'));
@@ -190,7 +176,6 @@
       return txs;
     }
 
-    // Fungsi Peringatan & Alarm Pengeluaran Mingguan
     function checkWeeklyExpenseBudget(limitBudget = 500000) {
       const transactions = getStoredTransactions();
       const now = new Date();
@@ -232,7 +217,7 @@
       }
     }
 
-    function loadTransactions() {
+    window.loadTransactions = function() {
       const period = document.getElementById('reportPeriod').value;
       const transactions = getStoredTransactions();
       const tbody = document.getElementById('transactionTableBody');
@@ -265,10 +250,14 @@
       }
 
       checkWeeklyExpenseBudget(500000);
+    };
+
+    const periodSelect = document.getElementById('reportPeriod');
+    if (periodSelect) {
+      periodSelect.addEventListener('change', loadTransactions);
     }
 
-    // Fungsi Cetak Struk dengan Watermark Daffcv
-    function printFinancialReport() {
+    window.printFinancialReport = function() {
       const period = document.getElementById('reportPeriod').value;
       const transactions = getStoredTransactions();
       const printWindow = window.open('', '_blank', 'height=650,width=800');
@@ -371,7 +360,7 @@
         </html>
       `);
       printWindow.document.close();
-    }
+    };
   </script>
 </body>
 </html>
