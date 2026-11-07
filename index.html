@@ -6,27 +6,28 @@
   <title>Catat Keuangan Pro - DaffCv</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col justify-between">
+<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col justify-between relative">
 
   <!-- MODAL / HALAMAN VERIFIKASI UID -->
   <div id="authModal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
-    <div class="bg-gray-800 border border-gray-700 p-6 rounded-xl shadow-2xl w-full max-w-md text-center">
+    <div class="bg-gray-800 border border-gray-700 p-6 rounded-xl shadow-2xl w-full max-w-md text-center relative z-50">
       <h2 class="text-2xl font-bold mb-2 text-white">Akses Terbatas</h2>
       <p class="text-sm text-gray-400 mb-6">Masukkan UID terdaftar untuk melanjutkan ke sistem keuangan.</p>
       
-      <input type="text" id="uidInput" placeholder="Contoh: daffa-001" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-white text-center tracking-wider font-mono focus:outline-none focus:border-blue-500 mb-4">
+      <input type="text" id="uidInput" placeholder="Contoh: daffa-001" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-white text-center tracking-wider font-mono focus:outline-none focus:border-blue-500 mb-4 relative z-50">
       
-      <button onclick="verifyUID()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition mb-3">
+      <!-- TOMBOL VERIFIKASI (MENGGUNAKAN ID UNTUK EVENT LISTENER) -->
+      <button type="button" id="verifyBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition mb-3 cursor-pointer relative z-50">
         Verifikasi UID
       </button>
 
       <!-- TOMBOL BELI AKSES KE NETLIFY -->
-      <a href="https://pro-keuangan-digital.netlify.app" target="_blank" class="block w-full bg-gray-700 hover:bg-gray-600 text-gray-200 text-sm font-medium py-2.5 rounded-lg transition mb-2">
-        Akses Login Premium (Jika Trial / Masa Aktif Habis)
+      <a href="https://pro-keuangan-digital.netlify.app" target="_blank" class="block w-full bg-gray-700 hover:bg-gray-600 text-gray-200 text-sm font-medium py-2.5 rounded-lg transition mb-2 text-center relative z-50">
+        Beli Akses (Jika Trial / Masa Aktif Habis)
       </a>
 
-      <!-- TOMBOL BELI AKSES KE WHATSAPP ADMIN (Ganti nomor di wa.me dengan nomor Anda) -->
-      <a href="https://wa.me/6288271109247?text=Halo%20Admin%20DaffCv,%20saya%20ingin%20membeli%20atau%20memperpanjang%20akses%20aplikasi%20keuangan." target="_blank" class="block w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium py-2.5 rounded-lg transition">
+      <!-- TOMBOL BELI AKSES KE WHATSAPP ADMIN -->
+      <a href="https://wa.me/6281234567890?text=Halo%20Admin%20DaffCv,%20saya%20ingin%20membeli%20atau%20memperpanjang%20akses%20aplikasi%20keuangan." target="_blank" class="block w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium py-2.5 rounded-lg transition text-center relative z-50">
         Beli Akses Disini (WhatsApp Admin)
       </a>
       
@@ -41,7 +42,7 @@
         <h1 class="text-xl font-bold">Catat Keuangan Pro</h1>
         <p class="text-xs text-gray-400" id="welcomeUser">Halo, Daffa</p>
       </div>
-      <button onclick="logout()" class="text-xs bg-red-600/20 text-red-400 hover:bg-red-600/30 px-3 py-1.5 rounded-lg transition">
+      <button id="logoutBtn" class="text-xs bg-red-600/20 text-red-400 hover:bg-red-600/30 px-3 py-1.5 rounded-lg transition">
         Keluar
       </button>
     </header>
@@ -61,7 +62,7 @@
         </div>
 
         <!-- Tombol Cetak Struk / Laporan -->
-        <button onclick="printFinancialReport()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
+        <button id="printBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
           </svg>
@@ -94,27 +95,27 @@
     &copy; 2026 DaffCv. All rights reserved.
   </footer>
 
-  <!-- Firebase App SDK & Firestore SDK (Modular v10) -->
+  <!-- SCRIPT UTAMA FIREBASE & LOGIKA APLIKASI -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     // --- KONFIGURASI FIREBASE ANDA ---
     const firebaseConfig = {
-  apiKey: "AIzaSyDq6ryYIrRXF2oDz8wfVoXrROaw8YhBlzA",
-  authDomain: "daffcv-keuangan.firebaseapp.com",
-  projectId: "daffcv-keuangan",
-  storageBucket: "daffcv-keuangan.firebasestorage.app",
-  messagingSenderId: "73351594108",
-  appId: "1:73351594108:web:6d5cbe27864ae67b99c9f9",
-  measurementId: "G-VGGVZ0DXGK"
-};
+      apiKey: "AIzaSyDq6ryYiRXF2oDz8wfVoXrROaw8YhBlzA",
+      authDomain: "daffcv-keuangan.firebaseapp.com",
+      projectId: "daffcv-keuangan",
+      storageBucket: "daffcv-keuangan.firebasestorage.app",
+      messagingSenderId: "73351594108",
+      appId: "1:73351594108:web:6d5cbe27846ae67b99c9f9",
+      measurementId: "G-VGGVZ0DXGK"
+    };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Cek Sesi Login Tersimpan
-    window.onload = function() {
+    // Cek Sesi Login Tersimpan saat halaman dimuat
+    window.addEventListener('DOMContentLoaded', () => {
       const savedUser = localStorage.getItem('daffcv_active_user');
       if (savedUser) {
         document.getElementById('authModal').classList.add('hidden');
@@ -122,10 +123,16 @@
         document.getElementById('welcomeUser').innerText = `Halo, ${savedUser}`;
         loadTransactions();
       }
-    };
+
+      // Hubungkan tombol-tombol dengan event listener secara aman
+      document.getElementById('verifyBtn').addEventListener('click', verifyUID);
+      document.getElementById('logoutBtn').addEventListener('click', logout);
+      document.getElementById('printBtn').addEventListener('click', printFinancialReport);
+      document.getElementById('reportPeriod').addEventListener('change', loadTransactions);
+    });
 
     // Fungsi Verifikasi UID ke Firestore
-    window.verifyUID = async function() {
+    async function verifyUID() {
       const uid = document.getElementById('uidInput').value.trim();
       const errorEl = document.getElementById('authError');
       
@@ -164,12 +171,12 @@
         errorEl.innerText = "Gagal terhubung ke server verifikasi. Periksa koneksi/aturan.";
         errorEl.classList.remove('hidden');
       }
-    };
+    }
 
-    window.logout = function() {
+    function logout() {
       localStorage.removeItem('daffcv_active_user');
       location.reload();
-    };
+    }
 
     function getStoredTransactions() {
       let txs = JSON.parse(localStorage.getItem('daffcv_transactions'));
@@ -225,7 +232,7 @@
       }
     }
 
-    window.loadTransactions = function() {
+    function loadTransactions() {
       const period = document.getElementById('reportPeriod').value;
       const transactions = getStoredTransactions();
       const tbody = document.getElementById('transactionTableBody');
@@ -258,12 +265,10 @@
       }
 
       checkWeeklyExpenseBudget(500000);
-    };
-
-    document.getElementById('reportPeriod').addEventListener('change', loadTransactions);
+    }
 
     // Fungsi Cetak Struk dengan Watermark Daffcv
-    window.printFinancialReport = function() {
+    function printFinancialReport() {
       const period = document.getElementById('reportPeriod').value;
       const transactions = getStoredTransactions();
       const printWindow = window.open('', '_blank', 'height=650,width=800');
@@ -366,7 +371,7 @@
         </html>
       `);
       printWindow.document.close();
-    };
+    }
   </script>
 </body>
 </html>
