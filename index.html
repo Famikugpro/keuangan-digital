@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Catat Keuangan Pro - DaffCv</title>
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col justify-between">
@@ -17,15 +16,25 @@
       
       <input type="text" id="uidInput" placeholder="Contoh: daffa-001" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-white text-center tracking-wider font-mono focus:outline-none focus:border-blue-500 mb-4">
       
-      <button onclick="verifyUID()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition">
+      <button onclick="verifyUID()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition mb-3">
         Verifikasi UID
       </button>
+
+      <!-- TOMBOL BELI AKSES KE NETLIFY -->
+      <a href="https://pro-keuangan-digital.netlify.app" target="_blank" class="block w-full bg-gray-700 hover:bg-gray-600 text-gray-200 text-sm font-medium py-2.5 rounded-lg transition mb-2">
+        Akses Login Premium (Jika Trial / Masa Aktif Habis)
+      </a>
+
+      <!-- TOMBOL BELI AKSES KE WHATSAPP ADMIN (Ganti nomor di wa.me dengan nomor Anda) -->
+      <a href="https://wa.me/6288271109247?text=Halo%20Admin%20DaffCv,%20saya%20ingin%20membeli%20atau%20memperpanjang%20akses%20aplikasi%20keuangan." target="_blank" class="block w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium py-2.5 rounded-lg transition">
+        Beli Akses Disini (WhatsApp Admin)
+      </a>
       
       <p id="authError" class="text-red-400 text-xs mt-3 hidden"></p>
     </div>
   </div>
 
-  <!-- KONTEN UTAMA APLIKASI (TERSEMBUNYI SEBELUM LOGIN) -->
+  <!-- KONTEN UTAMA APLIKASI -->
   <div id="appContent" class="hidden flex-1 max-w-4xl w-full mx-auto p-4 md:p-6">
     <header class="flex justify-between items-center mb-6 border-b border-gray-800 pb-4">
       <div>
@@ -74,7 +83,7 @@
             </tr>
           </thead>
           <tbody id="transactionTableBody">
-            <!-- Data transaksi akan dimuat di sini -->
+            <!-- Data transaksi dimuat di sini -->
           </tbody>
         </table>
       </div>
@@ -91,7 +100,7 @@
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     // --- KONFIGURASI FIREBASE ANDA ---
-   const firebaseConfig = {
+    const firebaseConfig = {
   apiKey: "AIzaSyDq6ryYIrRXF2oDz8wfVoXrROaw8YhBlzA",
   authDomain: "daffcv-keuangan.firebaseapp.com",
   projectId: "daffcv-keuangan",
@@ -100,6 +109,7 @@
   appId: "1:73351594108:web:6d5cbe27864ae67b99c9f9",
   measurementId: "G-VGGVZ0DXGK"
 };
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
@@ -127,7 +137,6 @@
 
       try {
         errorEl.classList.add('hidden');
-        // Mencari dokumen di dalam koleksi 'users'
         const docRef = doc(db, "users", uid);
         const docSnap = await getDoc(docRef);
 
@@ -162,11 +171,9 @@
       location.reload();
     };
 
-    // Fungsi Data Contoh & Filter
     function getStoredTransactions() {
       let txs = JSON.parse(localStorage.getItem('daffcv_transactions'));
       if (!txs) {
-        // Data dummy awal jika kosong
         txs = [
           { date: "2026-11-01", description: "Beli Alat Gambar", type: "expense", amount: 150000 },
           { date: "2026-11-05", description: "Cetak Banner", type: "expense", amount: 75000 }
@@ -174,6 +181,48 @@
         localStorage.setItem('daffcv_transactions', JSON.stringify(txs));
       }
       return txs;
+    }
+
+    // Fungsi Peringatan & Alarm Pengeluaran Mingguan
+    function checkWeeklyExpenseBudget(limitBudget = 500000) {
+      const transactions = getStoredTransactions();
+      const now = new Date();
+      let totalWeeklyExpense = 0;
+
+      transactions.forEach(tx => {
+        const txDate = new Date(tx.date);
+        const diffTime = Math.abs(now - txDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (tx.type === 'expense' && diffDays <= 7) {
+          totalWeeklyExpense += Number(tx.amount);
+        }
+      });
+
+      if (totalWeeklyExpense > limitBudget) {
+        playAlarmSound();
+        alert(`PERINGATAN! Pengeluaran mingguan Anda (Rp ${totalWeeklyExpense.toLocaleString('id-ID')}) telah melebihi batas maksimal Rp ${limitBudget.toLocaleString('id-ID')}!`);
+      }
+    }
+
+    function playAlarmSound() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        for (let i = 0; i < 3; i++) {
+          setTimeout(() => {
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.type = 'square';
+            oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.2);
+          }, i * 300);
+        }
+      } catch (e) {
+        console.log("Audio diblokir browser.");
+      }
     }
 
     window.loadTransactions = function() {
@@ -196,18 +245,19 @@
 
       if (filtered.length === 0) {
         tbody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-gray-500">Tidak ada transaksi pada periode ini.</td></tr>`;
-        return;
+      } else {
+        filtered.forEach(tx => {
+          tbody.innerHTML += `
+            <tr class="border-b border-gray-700/50">
+              <td class="py-2.5">${tx.date}</td>
+              <td class="py-2.5">${tx.description}</td>
+              <td class="py-2.5 text-right font-mono">Rp ${Number(tx.amount).toLocaleString('id-ID')}</td>
+            </tr>
+          `;
+        });
       }
 
-      filtered.forEach(tx => {
-        tbody.innerHTML += `
-          <tr class="border-b border-gray-700/50">
-            <td class="py-2.5">${tx.date}</td>
-            <td class="py-2.5">${tx.description}</td>
-            <td class="py-2.5 text-right font-mono">Rp ${Number(tx.amount).toLocaleString('id-ID')}</td>
-          </tr>
-        `;
-      });
+      checkWeeklyExpenseBudget(500000);
     };
 
     document.getElementById('reportPeriod').addEventListener('change', loadTransactions);
@@ -246,7 +296,6 @@
                 padding: 30px;
                 position: relative;
               }
-              /* Watermark Daffcv Tengah */
               .watermark {
                 position: fixed;
                 top: 50%;
